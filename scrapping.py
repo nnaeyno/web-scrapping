@@ -103,8 +103,8 @@ class BS4Scrapping:
         image = data['image']
         ingredients = data['recipeIngredient']
 
-        instructions = data['recipeInstructions']
-        yield_amount = data['recipeYield']
+        instructions = data['recipeInstructions'].split('\n')
+        yield_amount = int(data['recipeYield'].replace(' loaf', ''))
 
         pagination_items = one_recipe.find_all(
             'a', {'class': 'pagination__item'})
@@ -118,7 +118,7 @@ class BS4Scrapping:
             subcategory = Category(subcategory_item.text,
                                    subcategory_item['href'])
 
-        recipe = Recipe(name, ingredients, [
-                        instructions], category, subcategory, image, description, author, yield_amount)
+        recipe = Recipe(name, ingredients,
+                        instructions, category, subcategory, image, description, author, yield_amount)
         # print(recipe.to_dict())
         return recipe
