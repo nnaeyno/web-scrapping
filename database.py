@@ -32,6 +32,27 @@ class RecipeRepository:
     def list_all_recipes(self):
         return self.collection.find()
 
+    def get_avg_ingredients(self):
+        return self.collection.aggregate([
+            {'$unwind': '$ingredients'},
+            {'$group': {'_id': None, 'avgIngredients': {'$avg': {'$size': '$ingredients'}}}}
+        ])
+
+    def get_avg_steps(self):
+        return self.collection.aggregate([
+            {'$unwind': '$preparation_steps'},
+            {'$group': {'_id': None, 'avgSteps': {'$avg': {'$size': '$preparation_steps'}}}}
+        ])
+
+    def get_most_likes(self):
+        return self.collection.find().sort('likes', -1).limit(1)
+
+    def get_author_with_most_recipes(self):
+        return self.collection.aggregate([
+            {'$group': {'_id': '$author', 'count': {'$sum': 1}}},
+            {'$sort': {'count': -1}},
+            {'$limit': 1}
+        ])
 
 class RecipeService:
     def __init__(self, repository: RecipeRepository):
