@@ -4,7 +4,6 @@ import os
 
 
 class BS4Scrapping():
-    # Base URL of the website
 
     def __init__(self, url: str = "https://kulinaria.ge/"):
         self.base_url = url
@@ -42,6 +41,7 @@ class BS4Scrapping():
 
         recipe_nav_body = wvnianebi_soup.find('div', class_='recipe__nav-body')
 
+        recipes_list = wvnianebi_soup.find('div', class_='r')
         # Find all divs with class "txt" inside the "recipe__nav-body"
         recipe_titles = recipe_nav_body.find_all('div', class_='txt')
         # recipe_titles = wvnianebi_soup.find_all('div', class_='recipe__title')  # Hypothetical class for recipe titles
