@@ -1,3 +1,14 @@
+class Category:
+    def __init__(self, name: str, url: str):
+        self.name = name
+        self.url = url
+
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'url': self.url
+        }
+
 class Ingredient:
     def __init__(self, name: str, quantity: str):
         self.name = name
