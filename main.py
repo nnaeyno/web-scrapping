@@ -14,17 +14,23 @@ if __name__ == '__main__':
     scrapper = BS4Scrapping()
     recipes = scrapper.scrape_recipes()
 
-    print(recipes)
+    # print(recipes)
 
     db = create_mongo_client()
     repository = RecipeRepository(db)
     service = RecipeService(repository)
 
+    service.clear()
+
     for recipe in recipes:
         if recipe:
             service.create_recipe(recipe)
 
-    service.list_all_recipes()
+    print(list(service.list_all_recipes()))
+    # print(list(service.get_avg_steps()))
+    print(list(service.get_most_portions()))
+    print(list(service.get_author_with_most_recipes()))
+    # print(service.get_avg_ingredients())
 
     # TEST MONGO
     # if __name__ == "__main__":

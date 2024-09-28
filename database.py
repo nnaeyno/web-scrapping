@@ -40,12 +40,12 @@ class RecipeRepository:
 
     def get_avg_steps(self):
         return self.collection.aggregate([
-            {'$unwind': '$preparation_steps'},
-            {'$group': {'_id': None, 'avgSteps': {'$avg': {'$size': '$preparation_steps'}}}}
+            {'$unwind': '$steps'},
+            {'$group': {'_id': None, 'avgSteps': {'$avg': {'$size': '$steps'}}}}
         ])
 
-    def get_most_likes(self):
-        return self.collection.find().sort('likes', -1).limit(1)
+    def get_most_portions(self):
+        return self.collection.find().sort('portions', -1).limit(1)
 
     def get_author_with_most_recipes(self):
         return self.collection.aggregate([
@@ -53,6 +53,9 @@ class RecipeRepository:
             {'$sort': {'count': -1}},
             {'$limit': 1}
         ])
+
+    def clear(self):
+        self.collection.delete_many({})
 
 class RecipeService:
     def __init__(self, repository: RecipeRepository):
@@ -73,3 +76,18 @@ class RecipeService:
 
     def list_all_recipes(self):
         return self.repository.list_all_recipes()
+
+    def get_avg_ingredients(self):
+        return self.repository.get_avg_ingredients()
+
+    def get_avg_steps(self):
+        return self.repository.get_avg_steps()
+
+    def get_most_portions(self):
+        return self.repository.get_most_portions()
+
+    def get_author_with_most_recipes(self):
+        return self.repository.get_author_with_most_recipes()
+
+    def clear(self):
+        self.repository.clear()

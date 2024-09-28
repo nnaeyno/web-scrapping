@@ -104,7 +104,7 @@ class BS4Scrapping:
         ingredients = data['recipeIngredient']
 
         instructions = data['recipeInstructions'].split('\n')
-        yield_amount = data['recipeYield']
+        yield_amount = int(data['recipeYield'].replace(' loaf', ''))
 
         pagination_items = one_recipe.find_all(
             'a', {'class': 'pagination__item'})
