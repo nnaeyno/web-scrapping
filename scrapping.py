@@ -22,7 +22,7 @@ def get_ingredients(one_recipe):
 
 class BS4Scrapping:
 
-    def __init__(self, url: str = "https://kulinaria.ge/"):
+    def __init__(self, url: str = "https://kulinaria.ge"):
         self.base_url = url
 
     def get_soup(self, url):
@@ -32,7 +32,7 @@ class BS4Scrapping:
         soup = BeautifulSoup(response.text, 'html.parser')
         return soup
 
-    def scrape_recipes(self, category="wvnianebi"):
+    def scrape_recipes(self, category_name="wvnianebi"):
         recipes = []
         # Step 1: Load the main page to find the "/receptebi/" link
         main_page_url = f"{self.base_url}/"
@@ -58,12 +58,12 @@ class BS4Scrapping:
         # print(wvnianebi_soup)
         # You can now scrape the content of the "/wvnianebi/" page as needed
         # For example, let's print all recipe titles available on this page
-        category_name = wvnianebi_soup.find('h1', class_='title mainLeftSpace').text
+        category = Category(wvnianebi_soup.find('h1', class_='title mainLeftSpace').text, wvnianebi_url)
         print(category_name)
         sub_categories = wvnianebi_soup.find('div', class_='recipe__nav--view').find('div', class_='recipe__nav-body')
         sub_categories_names = sub_categories.find_all('div', class_='txt')
         sub_categories_urls = hrefs = [a['href'] for a in sub_categories.find_all('a', href=True)]
-        recipes = self.scrap_sub_categories(sub_categories_urls, sub_categories_names, category_name)
+        recipes = self.scrap_sub_categories(sub_categories_urls, sub_categories_names, category)
 
         return recipes
 
@@ -111,11 +111,14 @@ class BS4Scrapping:
     def scrap_sub_categories(self, sub_categories_urls, sub_categories_names, category_name):
         all_recipes = []
         for ind, sub_category_url in enumerate(sub_categories_urls):
-            all_recipes.append(self.scrap_one_sub_category(sub_category_url, category_name, sub_categories_names[ind]))
+            sub_category = Category(sub_categories_names[ind].text, self.base_url + sub_category_url)
+            print(sub_category.to_dict())
+            print(category_name.to_dict())
+            all_recipes += (self.scrap_one_sub_category(sub_category, category_name))
         return all_recipes
 
-    def scrap_one_sub_category(self, sub_category_url, category_name, sub_category_name):
-        wvnianebi_soup = self.get_soup(self.base_url + sub_category_url)
+    def scrap_one_sub_category(self, sub_category, category_name):
+        wvnianebi_soup = self.get_soup(sub_category.url)
         recipes = []
         recipes_list = wvnianebi_soup.find(
             'div', class_='kulinaria-row box-container')
@@ -128,7 +131,7 @@ class BS4Scrapping:
             a_tag = box_img.find('a', href=True)
             if a_tag:
                 href = a_tag['href']  # Extract the href attribute
-                recipes.append(self.scrap_one_recipe(href, category_name, sub_category_name))
+                recipes.append(self.scrap_one_recipe(href, category_name, sub_category))
                 # print(f"Found URL: {href}")
 
         return recipes

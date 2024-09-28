@@ -52,7 +52,7 @@ class Recipe:
         return {
             'name': self.name,
             'ingredients': [ingredient for ingredient in self.ingredients],
-            'steps': [step for step in self.steps],
+            'steps': [step.to_dict() for step in self.steps],
             'author_name': self.author_name,
             'subcategory': self.subcategory.to_dict(),
             'description': self.description,

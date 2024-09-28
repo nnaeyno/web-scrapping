@@ -14,17 +14,15 @@ if __name__ == '__main__':
     scrapper = BS4Scrapping()
     recipes = scrapper.scrape_recipes()
 
-    # print(recipes)
+    print(recipes)
 
     db = create_mongo_client()
     repository = RecipeRepository(db)
     service = RecipeService(repository)
-    #
-    # service.clear()
-    #
-    # for recipe in recipes:
-    #     if recipe:
-    #         service.create_recipe(recipe)
+
+    for recipe in recipes:
+        if recipe:
+            service.create_recipe(recipe)
 
     # print(list(service.list_all_recipes()))
 
