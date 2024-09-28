@@ -9,6 +9,7 @@ class Category:
             'url': self.url
         }
 
+
 class Ingredient:
     def __init__(self, name: str, quantity: str):
         self.name = name
@@ -44,6 +45,7 @@ class Recipe:
                 ულუფების რაოდენობა
                 რეცეპტის ინგრედიენტები
                 რეცეპტის მომზადების ეტაპები"""
+
     def __init__(self, name: str, ingredients: list[Ingredient], steps: list[Step], category: Category, subcategory: Category,
                  image_url: str, description: str, author_name: str, portions: int):
         self.name = name
@@ -56,7 +58,6 @@ class Recipe:
         self.category = category
         self.subcategory = subcategory
         self.portions = portions
-
 
     def to_dict(self):
         return {

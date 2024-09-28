@@ -17,12 +17,14 @@ class RecipeRepository:
         return self._convert_from_dict(data)
 
     def _convert_from_dict(self, data: dict) -> Recipe:
-        ingredients = [Ingredient(**ingredient) for ingredient in data['ingredients']]
+        ingredients = [Ingredient(**ingredient)
+                       for ingredient in data['ingredients']]
         steps = [Step(**step) for step in data['steps']]
         return Recipe(data['name'], ingredients, steps)
 
     def update_recipe(self, name: str, updated_recipe: Recipe):
-        self.collection.update_one({"name": name}, {"$set": updated_recipe.to_dict()})
+        self.collection.update_one(
+            {"name": name}, {"$set": updated_recipe.to_dict()})
 
     def delete_recipe(self, name: str):
         self.collection.delete_one({"name": name})

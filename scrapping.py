@@ -27,7 +27,8 @@ class BS4Scrapping:
         main_soup = self.get_soup(main_page_url)
 
         # Find the link for "/receptebi/"
-        receptebi_link = main_soup.find('a', class_='nav__item recipe-nav-text', href="/receptebi/")['href']
+        receptebi_link = main_soup.find(
+            'a', class_='nav__item recipe-nav-text', href="/receptebi/")['href']
         print(receptebi_link)
         # Step 2: Follow the "/receptebi/" link
         receptebi_url = self.base_url + receptebi_link
@@ -36,7 +37,8 @@ class BS4Scrapping:
         recipe_nav_body = receptebi_soup.find('div', class_='recipe__nav-body')
 
         # We will look for the specific link for "წვნიანები" (wvnianebi)
-        wvnianebi_link = recipe_nav_body.find('a', href="/receptebi/cat/wvnianebi/")['href']
+        wvnianebi_link = recipe_nav_body.find(
+            'a', href="/receptebi/cat/wvnianebi/")['href']
         print(wvnianebi_link)
         # Step 4: Follow the "/wvnianebi/" link
         wvnianebi_url = self.base_url + wvnianebi_link
@@ -47,13 +49,15 @@ class BS4Scrapping:
 
         recipe_nav_body = wvnianebi_soup.find('div', class_='recipe__nav-body')
 
-        recipes_list = wvnianebi_soup.find('div', class_='kulinaria-row box-container')
+        recipes_list = wvnianebi_soup.find(
+            'div', class_='kulinaria-row box-container')
         # recipes_list = recipes_list.find('div', class_='box box--author kulinaria-col-3 box--massonry')
         box_imgs = recipes_list.find_all('div', class_='box__img')
 
         # Iterate through each "box__img" div and find the href in the <a> tag
         for box_img in box_imgs:
-            a_tag = box_img.find('a', href=True)  # Find the <a> tag with an href attribute
+            # Find the <a> tag with an href attribute
+            a_tag = box_img.find('a', href=True)
             if a_tag:
                 href = a_tag['href']  # Extract the href attribute
                 recipes.append(self.scrap_one_recipe(href))
@@ -102,15 +106,19 @@ class BS4Scrapping:
         instructions = data['recipeInstructions']
         yield_amount = data['recipeYield']
 
-        pagination_items = one_recipe.find_all('a', {'class': 'pagination__item'})
-        categories = [item for item in pagination_items if "/cat/" in item['href']]
+        pagination_items = one_recipe.find_all(
+            'a', {'class': 'pagination__item'})
+        categories = [
+            item for item in pagination_items if "/cat/" in item['href']]
         category, subcategory = None, None
         if len(categories) >= 2:
             category_item = categories[0]
             category = Category(category_item.text, category_item['href'])
             subcategory_item = categories[1]
-            subcategory = Category(subcategory_item.text, subcategory_item['href'])
+            subcategory = Category(subcategory_item.text,
+                                   subcategory_item['href'])
 
-        recipe = Recipe(name, ingredients, [instructions], category, subcategory, image, description, author, yield_amount)
+        recipe = Recipe(name, ingredients, [
+                        instructions], category, subcategory, image, description, author, yield_amount)
         # print(recipe.to_dict())
         return recipe
