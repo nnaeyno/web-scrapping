@@ -5,7 +5,19 @@ import requests
 from bs4 import BeautifulSoup
 import os
 
-from objects import Recipe, Category
+from objects import Recipe, Category, Step
+
+
+def get_ingredients(one_recipe):
+    ingredients = one_recipe.find_all('div', class_='list__item')
+
+    def parse_one_ingredient(ingredient):
+        text = ingredient.get_text(separator=" ", strip=True)
+        cleaned_text = ' '.join(text.split())
+        return cleaned_text
+
+    ingredients = list(map(parse_one_ingredient, ingredients))
+    return ingredients
 
 
 class BS4Scrapping:
@@ -20,7 +32,7 @@ class BS4Scrapping:
         soup = BeautifulSoup(response.text, 'html.parser')
         return soup
 
-    def scrape_recipes(self):
+    def scrape_recipes(self, category="wvnianebi"):
         recipes = []
         # Step 1: Load the main page to find the "/receptebi/" link
         main_page_url = f"{self.base_url}/"
@@ -43,12 +55,68 @@ class BS4Scrapping:
         # Step 4: Follow the "/wvnianebi/" link
         wvnianebi_url = self.base_url + wvnianebi_link
         wvnianebi_soup = self.get_soup(wvnianebi_url)
-
+        # print(wvnianebi_soup)
         # You can now scrape the content of the "/wvnianebi/" page as needed
         # For example, let's print all recipe titles available on this page
+        category_name = wvnianebi_soup.find('h1', class_='title mainLeftSpace').text
+        print(category_name)
+        sub_categories = wvnianebi_soup.find('div', class_='recipe__nav--view').find('div', class_='recipe__nav-body')
+        sub_categories_names = sub_categories.find_all('div', class_='txt')
+        sub_categories_urls = hrefs = [a['href'] for a in sub_categories.find_all('a', href=True)]
+        recipes = self.scrap_sub_categories(sub_categories_urls, sub_categories_names, category_name)
 
-        recipe_nav_body = wvnianebi_soup.find('div', class_='recipe__nav-body')
+        return recipes
 
+    def scrap_one_recipe(self, one_recipe_url, category, subcategory):
+        one_recipe = self.get_soup(self.base_url + one_recipe_url)
+        """ რეცეპტის დასახელება
+            რეცეპტის მისამართი (URL თვითონ რეცეპტის) - one_recipe_url
+            რეცეპტის მთავარი კატეგორიის დასახელება და მისამართი(URL) 
+                ( მაგ: {title: სალათები, url: https://kulinaria.ge/receptebi/cat/salaTebi/}) - outer scope
+            რეცეპტის ქვეკატეგორის დასახელება და მისამართი(URL) 
+                ( მაგ: {title: ცხელი სალათები, url: https://kulinaria.ge/receptebi/cat/salaTebi/cxeli-salaTebi/}) - outer scope
+            მთავარი სურათის მისამართი 
+            მოკლე აღწერა( გარედან რეცეპტს რაც აქვს - რეცეპტის დეტალურიდანაც შეიძლება მაგ ინფოს აღება)
+            ავტორი სახელი
+            ულუფების რაოდენობა
+            რეცეპტის ინგრედიენტები (სიის სახით უნდა შევინახოთ ყველა)
+            რეცეპტის მომზადების ეტაპები (თავისი ეტაპის ნომრით და აღწერით) """
+
+        name = one_recipe.find('div', class_='post__title').find('h1').text
+        print(name)
+        ingredients = get_ingredients(one_recipe)
+        image = self.base_url + one_recipe.find('div', class_='post__img').find('img')["src"]
+        description = one_recipe.find('div', class_='post__description').text.strip()
+        author = one_recipe.find('div', class_='post__author').find('a').text.strip()
+        portion = self.get_portion(one_recipe)
+        instructions = self.get_instructions(one_recipe)
+        recipe = Recipe(name, ingredients,
+                        instructions, category, subcategory, image, description, author, portion)
+        return recipe
+
+    def get_portion(self, one_recipe):
+        portion = one_recipe.findAll('div', class_='lineDesc__item')[1].text.strip()
+        portion = portion.split()
+        return int(portion[0]) if len(portion) > 1 else 1
+
+    def get_instructions(self, one_recipe):
+        instructions = one_recipe.findAll('div', class_='lineList__item')
+        instructions = list(map(lambda x: x.find('p').text.strip(), instructions))
+        result = []
+        for step_number, step_desc in enumerate(instructions):
+            step = Step(step_number, step_desc)
+            result.append(step)
+        return result
+
+    def scrap_sub_categories(self, sub_categories_urls, sub_categories_names, category_name):
+        all_recipes = []
+        for ind, sub_category_url in enumerate(sub_categories_urls):
+            all_recipes.append(self.scrap_one_sub_category(sub_category_url, category_name, sub_categories_names[ind]))
+        return all_recipes
+
+    def scrap_one_sub_category(self, sub_category_url, category_name, sub_category_name):
+        wvnianebi_soup = self.get_soup(self.base_url + sub_category_url)
+        recipes = []
         recipes_list = wvnianebi_soup.find(
             'div', class_='kulinaria-row box-container')
         # recipes_list = recipes_list.find('div', class_='box box--author kulinaria-col-3 box--massonry')
@@ -60,65 +128,7 @@ class BS4Scrapping:
             a_tag = box_img.find('a', href=True)
             if a_tag:
                 href = a_tag['href']  # Extract the href attribute
-                recipes.append(self.scrap_one_recipe(href))
+                recipes.append(self.scrap_one_recipe(href, category_name, sub_category_name))
                 # print(f"Found URL: {href}")
 
         return recipes
-
-    def scrap_one_recipe(self, one_recipe_url):
-        one_recipe = self.get_soup(self.base_url + one_recipe_url)
-        """ რეცეპტის დასახელება
-            რეცეპტის მისამართი (URL თვითონ რეცეპტის) - one_recipe_url
-            რეცეპტის მთავარი კატეგორიის დასახელება და მისამართი(URL) 
-                ( მაგ: {title: სალათები, url: https://kulinaria.ge/receptebi/cat/salaTebi/}) - outer scope
-            რეცეპტის ქვეკატეგორიiს დასახელება და მისამართი(URL) 
-                ( მაგ: {title: ცხელი სალათები, url: https://kulinaria.ge/receptebi/cat/salaTebi/cxeli-salaTebi/}) - outer scope
-            მთავარი სურათის მისამართი 
-            მოკლე აღწერა( გარედან რეცეპტს რაც აქვს - რეცეპტის დეტალურიდანაც შეიძლება მაგ ინფოს აღება)
-            ავტორი სახელი
-            ულუფების რაოდენობა
-            რეცეპტის ინგრედიენტები (სიის სახით უნდა შევინახოთ ყველა)
-            რეცეპტის მომზადების ეტაპები (თავისი ეტაპის ნომრით და აღწერით) """
-        script = one_recipe.find('script', {'type': 'application/ld+json'})
-        data = {}
-
-        if script is not None:
-            try:
-                # Convert HTML entities to their corresponding characters
-                unescaped_string = html.unescape(script.string)
-
-                # Parse the JSON from the unescaped script string
-                data = json.loads(unescaped_string)
-            except json.JSONDecodeError:
-                print(f'Error decoding JSON for script: {script.string}')
-                return
-        else:
-            print('No script tag found')
-            return
-
-        # Access the data in the JSON
-        name = data['name']
-        author = data['author']
-        description = data['description']
-        image = data['image']
-        ingredients = data['recipeIngredient']
-
-        instructions = data['recipeInstructions'].split('\n')
-        yield_amount = int(data['recipeYield'].replace(' loaf', ''))
-
-        pagination_items = one_recipe.find_all(
-            'a', {'class': 'pagination__item'})
-        categories = [
-            item for item in pagination_items if "/cat/" in item['href']]
-        category, subcategory = None, None
-        if len(categories) >= 2:
-            category_item = categories[0]
-            category = Category(category_item.text, category_item['href'])
-            subcategory_item = categories[1]
-            subcategory = Category(subcategory_item.text,
-                                   subcategory_item['href'])
-
-        recipe = Recipe(name, ingredients,
-                        instructions, category, subcategory, image, description, author, yield_amount)
-        # print(recipe.to_dict())
-        return recipe

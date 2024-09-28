@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 
-from objects import Ingredient, Step, Recipe
+from objects import Step, Recipe
 
 
 class RecipeRepository:
@@ -11,18 +11,6 @@ class RecipeRepository:
         print(type(recipe.steps))
         print(type(recipe.to_dict()["steps"]))
         self.collection.insert_one(recipe.to_dict())
-
-    def get_recipe(self, name: str) -> Recipe:
-        data = self.collection.find_one({"name": name})
-        if not data:
-            return None
-        return self._convert_from_dict(data)
-
-    def _convert_from_dict(self, data: dict) -> Recipe:
-        ingredients = [Ingredient(**ingredient)
-                       for ingredient in data['ingredients']]
-        steps = [Step(**step) for step in data['steps']]
-        return Recipe(data['name'], ingredients, steps)
 
     def update_recipe(self, name: str, updated_recipe: Recipe):
         self.collection.update_one(
@@ -57,6 +45,7 @@ class RecipeRepository:
     def clear(self):
         self.collection.delete_many({})
 
+
 class RecipeService:
     def __init__(self, repository: RecipeRepository):
         self.repository = repository
@@ -64,10 +53,7 @@ class RecipeService:
     def create_recipe(self, recipe: Recipe):
         self.repository.add_recipe(recipe)
 
-    def get_recipe_by_name(self, name: str) -> Recipe:
-        return self.repository.get_recipe(name)
-
-    def update_recipe(self, name: str, ingredients: list[Ingredient], steps: list[Step]):
+    def update_recipe(self, name: str, ingredients: list[str], steps: list[Step]):
         recipe = Recipe(name, ingredients, steps)
         self.repository.update_recipe(name, recipe)
 
