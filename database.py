@@ -49,7 +49,7 @@ class RecipeRepository:
 
     def get_author_with_most_recipes(self):
         return self.collection.aggregate([
-            {'$group': {'_id': '$author', 'count': {'$sum': 1}}},
+            {'$group': {'_id': '$author_name', 'count': {'$sum': 1}}},
             {'$sort': {'count': -1}},
             {'$limit': 1}
         ])
