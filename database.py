@@ -8,8 +8,6 @@ class RecipeRepository:
         self.collection = db['recipes']
 
     def add_recipe(self, recipe: Recipe):
-        print(type(recipe.steps))
-        print(type(recipe.to_dict()["steps"]))
         self.collection.insert_one(recipe.to_dict())
 
     def get_recipe(self, name: str) -> Recipe:
@@ -36,7 +34,8 @@ class RecipeRepository:
 
     def get_avg_ingredients(self):
         return self.collection.aggregate([
-            {'$group': {'_id': None, 'avgIngredients': {'$avg': {'$size': '$ingredients'}}}}
+            {'$group': {'_id': None, 'avgIngredients': {
+                '$avg': {'$size': '$ingredients'}}}}
         ])
 
     def get_avg_steps(self):
@@ -56,6 +55,7 @@ class RecipeRepository:
 
     def clear(self):
         self.collection.delete_many({})
+
 
 class RecipeService:
     def __init__(self, repository: RecipeRepository):
