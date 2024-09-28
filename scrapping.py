@@ -1,3 +1,4 @@
+import html
 import json
 
 import requests
@@ -50,20 +51,12 @@ class BS4Scrapping:
         box_imgs = recipes_list.find_all('div', class_='box__img')
 
         # Iterate through each "box__img" div and find the href in the <a> tag
-        scraped = False
         for box_img in box_imgs:
             a_tag = box_img.find('a', href=True)  # Find the <a> tag with an href attribute
             if a_tag:
                 href = a_tag['href']  # Extract the href attribute
-                if not scraped:
-                    self.scrap_one_recipe(href)
-                    scraped = True
+                self.scrap_one_recipe(href)
                 print(f"Found URL: {href}")
-        # Find all divs with class "txt" inside the "recipe__nav-body"
-        recipe_titles = recipe_nav_body.find_all('div', class_='txt')
-        # recipe_titles = wvnianebi_soup.find_all('div', class_='recipe__title')  # Hypothetical class for recipe titles
-        for title in recipe_titles:
-            print(title.text.strip())
 
     def scrap_one_recipe(self, one_recipe_url):
         one_recipe = self.get_soup(self.base_url + one_recipe_url)
@@ -80,9 +73,21 @@ class BS4Scrapping:
             რეცეპტის ინგრედიენტები (სიის სახით უნდა შევინახოთ ყველა)
             რეცეპტის მომზადების ეტაპები (თავისი ეტაპის ნომრით და აღწერით) """
         script = one_recipe.find('script', {'type': 'application/ld+json'})
+        data = {}
 
-        # Parse the JSON from the script tag
-        data = json.loads(script.string)
+        if script is not None:
+            try:
+                # Convert HTML entities to their corresponding characters
+                unescaped_string = html.unescape(script.string)
+
+                # Parse the JSON from the unescaped script string
+                data = json.loads(unescaped_string)
+            except json.JSONDecodeError:
+                print(f'Error decoding JSON for script: {script.string}')
+                return
+        else:
+            print('No script tag found')
+            return
 
         # Access the data in the JSON
         name = data['name']
@@ -94,7 +99,6 @@ class BS4Scrapping:
         instructions = data['recipeInstructions']
         yield_amount = data['recipeYield']
 
-        # Assuming 'soup' is your BeautifulSoup object
         pagination_items = one_recipe.find_all('a', {'class': 'pagination__item'})
         categories = [item for item in pagination_items if "/cat/" in item['href']]
         category, subcategory = None, None
