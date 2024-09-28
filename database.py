@@ -74,3 +74,4 @@ class RecipeService:
 
     def clear(self):
         self.repository.clear()
+

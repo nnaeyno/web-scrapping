@@ -32,7 +32,8 @@ class Recipe:
                 ავტორი სახელი
                 ულუფების რაოდენობა
                 რეცეპტის ინგრედიენტები
-                რეცეპტის მომზადების ეტაპები"""
+                რეცეპტის მომზადების ეტაპები
+                """
 
     def __init__(self, name: str, ingredients: list[str], steps: list[Step], category: Category,
                  subcategory: Category,

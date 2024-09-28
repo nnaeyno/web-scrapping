@@ -1,4 +1,3 @@
-
 # Recipe Scraper App
 This application scrapes recipes from the kulinaria.ge website using Beautiful Soup and stores the scraped data in a MongoDB database.<br> 
 It extracts information such as the recipe name, ingredients, steps, category, subcategory, portions, and other metadata, saving them  <br> 

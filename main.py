@@ -1,5 +1,4 @@
 from database import RecipeRepository, RecipeService
-from objects import Step
 from scrapping import BS4Scrapping
 
 from pymongo import MongoClient

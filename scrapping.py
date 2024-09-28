@@ -117,7 +117,6 @@ class BS4Scrapping:
 
         # Iterate through each "box__img" div and find the href in the <a> tag
         for box_img in box_imgs:
-            # Find the <a> tag with an href attribute
             a_tag = box_img.find('a', href=True)
             if a_tag:
                 href = a_tag['href']  # Extract the href attribute
