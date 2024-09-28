@@ -49,7 +49,13 @@ class Recipe:
 
     def to_dict(self):
         return {
-            "name": self.name,
-            "ingredients": [ingredient for ingredient in self.ingredients],
-            "steps": [step for step in self.steps]
+            'name': self.name,
+            'ingredients': [ingredient for ingredient in self.ingredients],
+            'steps': [step for step in self.steps],
+            'author_name': self.author_name,
+            'subcategory': self.subcategory,
+            'description': self.description,
+            'image_url': self.image_url,
+            'category': self.category,
+            'portions': self.portions
         }
