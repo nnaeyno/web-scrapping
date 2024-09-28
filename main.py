@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import os
 
 # Base URL of the website
-base_url = "https://www.example.com"
+base_url = "https://kulinaria.ge/"
 
 
 def get_soup(url):
