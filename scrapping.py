@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import os
 
 
-class BS4Scrapping():
+class BS4Scrapping:
 
     def __init__(self, url: str = "https://kulinaria.ge/"):
         self.base_url = url
@@ -15,7 +15,7 @@ class BS4Scrapping():
         soup = BeautifulSoup(response.text, 'html.parser')
         return soup
 
-    def scrape_receptebi(self):
+    def scrape_recipes(self):
         # Step 1: Load the main page to find the "/receptebi/" link
         main_page_url = f"{self.base_url}/"
         main_soup = self.get_soup(main_page_url)
@@ -41,9 +41,35 @@ class BS4Scrapping():
 
         recipe_nav_body = wvnianebi_soup.find('div', class_='recipe__nav-body')
 
-        recipes_list = wvnianebi_soup.find('div', class_='r')
+        recipes_list = wvnianebi_soup.find('div', class_='kulinaria-row box-container')
+        # recipes_list = recipes_list.find('div', class_='box box--author kulinaria-col-3 box--massonry')
+        box_imgs = recipes_list.find_all('div', class_='box__img')
+
+        # Iterate through each "box__img" div and find the href in the <a> tag
+        for box_img in box_imgs:
+            a_tag = box_img.find('a', href=True)  # Find the <a> tag with an href attribute
+            if a_tag:
+                href = a_tag['href']  # Extract the href attribute
+                self.scrap_one_recipe(href)
+                print(f"Found URL: {href}")
         # Find all divs with class "txt" inside the "recipe__nav-body"
         recipe_titles = recipe_nav_body.find_all('div', class_='txt')
         # recipe_titles = wvnianebi_soup.find_all('div', class_='recipe__title')  # Hypothetical class for recipe titles
         for title in recipe_titles:
             print(title.text.strip())
+
+    def scrap_one_recipe(self, one_recipe_url):
+        one_recipe = self.get_soup(self.base_url + one_recipe_url)
+        """ რეცეპტის დასახელება
+            რეცეპტის მისამართი (URL თვითონ რეცეპტის) - one_recipe_url
+            რეცეპტის მთავარი კატეგორიის დასახელება და მისამართი(URL) 
+                ( მაგ: {title: სალათები, url: https://kulinaria.ge/receptebi/cat/salaTebi/}) - outer scope
+            რეცეპტის ქვეკატეგორიiს დასახელება და მისამართი(URL) 
+                ( მაგ: {title: ცხელი სალათები, url: https://kulinaria.ge/receptebi/cat/salaTebi/cxeli-salaTebi/}) - outer scope
+            მთავარი სურათის მისამართი 
+            მოკლე აღწერა( გარედან რეცეპტს რაც აქვს - რეცეპტის დეტალურიდანაც შეიძლება მაგ ინფოს აღება)
+            ავტორი სახელი
+            ულუფების რაოდენობა
+            რეცეპტის ინგრედიენტები (სიის სახით უნდა შევინახოთ ყველა)
+            რეცეპტის მომზადების ეტაპები (თავისი ეტაპის ნომრით და აღწერით) """
+        
