@@ -50,6 +50,6 @@ class Recipe:
     def to_dict(self):
         return {
             "name": self.name,
-            "ingredients": [ingredient.to_dict() for ingredient in self.ingredients],
-            "steps": [step.to_dict() for step in self.steps]
+            "ingredients": [ingredient for ingredient in self.ingredients],
+            "steps": [step for step in self.steps]
         }

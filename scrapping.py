@@ -1,6 +1,10 @@
+import json
+
 import requests
 from bs4 import BeautifulSoup
 import os
+
+from objects import Recipe
 
 
 class BS4Scrapping:
@@ -46,11 +50,14 @@ class BS4Scrapping:
         box_imgs = recipes_list.find_all('div', class_='box__img')
 
         # Iterate through each "box__img" div and find the href in the <a> tag
+        scraped = False
         for box_img in box_imgs:
             a_tag = box_img.find('a', href=True)  # Find the <a> tag with an href attribute
             if a_tag:
                 href = a_tag['href']  # Extract the href attribute
-                self.scrap_one_recipe(href)
+                if not scraped:
+                    self.scrap_one_recipe(href)
+                    scraped = True
                 print(f"Found URL: {href}")
         # Find all divs with class "txt" inside the "recipe__nav-body"
         recipe_titles = recipe_nav_body.find_all('div', class_='txt')
@@ -72,4 +79,39 @@ class BS4Scrapping:
             ულუფების რაოდენობა
             რეცეპტის ინგრედიენტები (სიის სახით უნდა შევინახოთ ყველა)
             რეცეპტის მომზადების ეტაპები (თავისი ეტაპის ნომრით და აღწერით) """
-        
+        script = one_recipe.find('script', {'type': 'application/ld+json'})
+
+        # Parse the JSON from the script tag
+        data = json.loads(script.string)
+
+        # Access the data in the JSON
+        name = data['name']
+        author = data['author']
+        description = data['description']
+        image = data['image']
+        ingredients = data['recipeIngredient']
+
+        instructions = data['recipeInstructions']
+        yield_amount = data['recipeYield']
+        print(instructions)
+        recipe = Recipe(name, ingredients, [instructions], "cat1", "cat2", image, description, author, yield_amount)
+        print(recipe.to_dict())
+
+'''
+{'name': 'პომინდვრის წვნიანი',
+'ingredients': ['სურვილისამებრ სუხარი',
+'სურვილისამებრ პარმეზანი', 
+'გემოვნებით პილპილი', 
+'გემოვნებით მარილი', '1.000 ცალი გალინა ბლანკას კუბი',
+'600.000 მლ/ლ წყალი', '1.000 ჩ/კ დაფქული ქინძი', '1.000 ჩ/კ ორეგანო', 
+'1.000 ჩ/კ როზმარინი', '1.000 ს/კ ტომატ პასტა', '1.000 ს/კ ზეთი', 
+'70.000 გრამი მწვანე ხახვი', '1.000 კბილი ნიორი', '3.000 ცალი ბულგარული წითელი',
+ '5.000 ცალი პომიდორი'], 'steps': ['\n1. გემრიელად მიირთვით.\n2.
+  თეფშზე სურვილისამებრ დაუმატეთ პარმეზანი და სუხარი.\n3. 
+  როცა წვნიანი ადუღდება დაუმატეთ როზმარინი,ორეგანო,დაფქული ქინძი,
+  მარილი,პილპილი გემოვნებით ადუღეთ კიდევ ცოტა ხანს და გადაიტამეთ 
+  მთლიანი მასა ბლენდერში კარგად დააბლენდერეთ მიღებული მასა დაასხით თეფშზე.\n4.
+   ცალკე ადუღე ულ წყალში გახსენით &quot;გალინა ბლანკას&quot;კუბი და ჩაასხით ქვაბში.\n5. 
+   ღრმა ქვაბში ჩაასხით ზეთი და ნიორი მოთუშეთ დაუმატეთ მწვანე ხახვი, პომიდორი,წითელი 
+   ბულგარული,ტომატ პასტა მოთუშეთ დაბალ ცეცხლზე.']}
+'''
