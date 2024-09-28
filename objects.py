@@ -10,18 +10,6 @@ class Category:
         }
 
 
-class Ingredient:
-    def __init__(self, name: str, quantity: str):
-        self.name = name
-        self.quantity = quantity
-
-    def to_dict(self):
-        return {
-            "name": self.name,
-            "quantity": self.quantity
-        }
-
-
 class Step:
     def __init__(self, step_number: int, description: str):
         self.step_number = step_number
@@ -46,7 +34,8 @@ class Recipe:
                 რეცეპტის ინგრედიენტები
                 რეცეპტის მომზადების ეტაპები"""
 
-    def __init__(self, name: str, ingredients: list[Ingredient], steps: list[Step], category: Category, subcategory: Category,
+    def __init__(self, name: str, ingredients: list[str], steps: list[Step], category: Category,
+                 subcategory: Category,
                  image_url: str, description: str, author_name: str, portions: int):
         self.name = name
         self.ingredients = ingredients
@@ -63,7 +52,7 @@ class Recipe:
         return {
             'name': self.name,
             'ingredients': [ingredient for ingredient in self.ingredients],
-            'steps': [step for step in self.steps],
+            'steps': [step.to_dict() for step in self.steps],
             'author_name': self.author_name,
             'subcategory': self.subcategory.to_dict(),
             'description': self.description,
