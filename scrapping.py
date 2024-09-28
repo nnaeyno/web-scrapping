@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 
-from objects import Recipe
+from objects import Recipe, Category
 
 
 class BS4Scrapping:
@@ -93,8 +93,18 @@ class BS4Scrapping:
 
         instructions = data['recipeInstructions']
         yield_amount = data['recipeYield']
-        print(instructions)
-        recipe = Recipe(name, ingredients, [instructions], "cat1", "cat2", image, description, author, yield_amount)
+
+        # Assuming 'soup' is your BeautifulSoup object
+        pagination_items = one_recipe.find_all('a', {'class': 'pagination__item'})
+        categories = [item for item in pagination_items if "/cat/" in item['href']]
+        category, subcategory = None, None
+        if len(categories) >= 2:
+            category_item = categories[0]
+            category = Category(category_item.text, category_item['href'])
+            subcategory_item = categories[1]
+            subcategory = Category(subcategory_item.text, subcategory_item['href'])
+
+        recipe = Recipe(name, ingredients, [instructions], category, subcategory, image, description, author, yield_amount)
         print(recipe.to_dict())
 
 '''

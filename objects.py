@@ -44,7 +44,7 @@ class Recipe:
                 ულუფების რაოდენობა
                 რეცეპტის ინგრედიენტები
                 რეცეპტის მომზადების ეტაპები"""
-    def __init__(self, name: str, ingredients: list[Ingredient], steps: list[Step], category: str, subcategory: str,
+    def __init__(self, name: str, ingredients: list[Ingredient], steps: list[Step], category: Category, subcategory: Category,
                  image_url: str, description: str, author_name: str, portions: int):
         self.name = name
         self.ingredients = ingredients
@@ -64,9 +64,9 @@ class Recipe:
             'ingredients': [ingredient for ingredient in self.ingredients],
             'steps': [step for step in self.steps],
             'author_name': self.author_name,
-            'subcategory': self.subcategory,
+            'subcategory': self.subcategory.to_dict(),
             'description': self.description,
             'image_url': self.image_url,
-            'category': self.category,
+            'category': self.category.to_dict(),
             'portions': self.portions
         }
