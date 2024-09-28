@@ -1,9 +1,5 @@
-import html
-import json
-
 import requests
 from bs4 import BeautifulSoup
-import os
 
 from objects import Recipe, Category, Step
 
@@ -33,33 +29,21 @@ class BS4Scrapping:
         return soup
 
     def scrape_recipes(self, category_name="wvnianebi"):
-        recipes = []
-        # Step 1: Load the main page to find the "/receptebi/" link
         main_page_url = f"{self.base_url}/"
         main_soup = self.get_soup(main_page_url)
-
-        # Find the link for "/receptebi/"
         receptebi_link = main_soup.find(
             'a', class_='nav__item recipe-nav-text', href="/receptebi/")['href']
-        print(receptebi_link)
-        # Step 2: Follow the "/receptebi/" link
         receptebi_url = self.base_url + receptebi_link
         receptebi_soup = self.get_soup(receptebi_url)
-        # Step 3: Find the link for "/wvnianebi/"
         recipe_nav_body = receptebi_soup.find('div', class_='recipe__nav-body')
 
         # We will look for the specific link for "წვნიანები" (wvnianebi)
-        wvnianebi_link = recipe_nav_body.find(
-            'a', href="/receptebi/cat/wvnianebi/")['href']
-        print(wvnianebi_link)
-        # Step 4: Follow the "/wvnianebi/" link
-        wvnianebi_url = self.base_url + wvnianebi_link
-        wvnianebi_soup = self.get_soup(wvnianebi_url)
-        # print(wvnianebi_soup)
-        # You can now scrape the content of the "/wvnianebi/" page as needed
-        # For example, let's print all recipe titles available on this page
-        category = Category(wvnianebi_soup.find('h1', class_='title mainLeftSpace').text, wvnianebi_url)
-        print(category_name)
+        category_link = recipe_nav_body.find(
+            'a', href=f"/receptebi/cat/{category_name}/")['href']
+
+        category_url = self.base_url + category_link
+        wvnianebi_soup = self.get_soup(category_url)
+        category = Category(wvnianebi_soup.find('h1', class_='title mainLeftSpace').text, category_url)
         sub_categories = wvnianebi_soup.find('div', class_='recipe__nav--view').find('div', class_='recipe__nav-body')
         sub_categories_names = sub_categories.find_all('div', class_='txt')
         sub_categories_urls = hrefs = [a['href'] for a in sub_categories.find_all('a', href=True)]
@@ -83,7 +67,6 @@ class BS4Scrapping:
             რეცეპტის მომზადების ეტაპები (თავისი ეტაპის ნომრით და აღწერით) """
 
         name = one_recipe.find('div', class_='post__title').find('h1').text
-        print(name)
         ingredients = get_ingredients(one_recipe)
         image = self.base_url + one_recipe.find('div', class_='post__img').find('img')["src"]
         description = one_recipe.find('div', class_='post__description').text.strip()
@@ -112,17 +95,14 @@ class BS4Scrapping:
         all_recipes = []
         for ind, sub_category_url in enumerate(sub_categories_urls):
             sub_category = Category(sub_categories_names[ind].text, self.base_url + sub_category_url)
-            print(sub_category.to_dict())
-            print(category_name.to_dict())
             all_recipes += (self.scrap_one_sub_category(sub_category, category_name))
         return all_recipes
 
     def scrap_one_sub_category(self, sub_category, category_name):
-        wvnianebi_soup = self.get_soup(sub_category.url)
+        soup = self.get_soup(sub_category.url)
         recipes = []
-        recipes_list = wvnianebi_soup.find(
+        recipes_list = soup.find(
             'div', class_='kulinaria-row box-container')
-        # recipes_list = recipes_list.find('div', class_='box box--author kulinaria-col-3 box--massonry')
         box_imgs = recipes_list.find_all('div', class_='box__img')
 
         # Iterate through each "box__img" div and find the href in the <a> tag
@@ -132,6 +112,5 @@ class BS4Scrapping:
             if a_tag:
                 href = a_tag['href']  # Extract the href attribute
                 recipes.append(self.scrap_one_recipe(href, category_name, sub_category))
-                # print(f"Found URL: {href}")
 
         return recipes

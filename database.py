@@ -1,5 +1,3 @@
-from pymongo import MongoClient
-
 from objects import Step, Recipe
 
 
@@ -8,8 +6,6 @@ class RecipeRepository:
         self.collection = db['recipes']
 
     def add_recipe(self, recipe: Recipe):
-        print(type(recipe.steps))
-        print(type(recipe.to_dict()["steps"]))
         self.collection.insert_one(recipe.to_dict())
 
     def update_recipe(self, name: str, updated_recipe: Recipe):
