@@ -8,6 +8,8 @@ class RecipeRepository:
         self.collection = db['recipes']
 
     def add_recipe(self, recipe: Recipe):
+        print(type(recipe.steps))
+        print(type(recipe.to_dict()["steps"]))
         self.collection.insert_one(recipe.to_dict())
 
     def get_recipe(self, name: str) -> Recipe:
@@ -34,13 +36,11 @@ class RecipeRepository:
 
     def get_avg_ingredients(self):
         return self.collection.aggregate([
-            {'$unwind': '$ingredients'},
             {'$group': {'_id': None, 'avgIngredients': {'$avg': {'$size': '$ingredients'}}}}
         ])
 
     def get_avg_steps(self):
         return self.collection.aggregate([
-            {'$unwind': '$steps'},
             {'$group': {'_id': None, 'avgSteps': {'$avg': {'$size': '$steps'}}}}
         ])
 
@@ -78,16 +78,16 @@ class RecipeService:
         return self.repository.list_all_recipes()
 
     def get_avg_ingredients(self):
-        return self.repository.get_avg_ingredients()
+        return self.repository.get_avg_ingredients().next()['avgIngredients']
 
     def get_avg_steps(self):
-        return self.repository.get_avg_steps()
+        return self.repository.get_avg_steps().next()['avgSteps']
 
     def get_most_portions(self):
-        return self.repository.get_most_portions()
+        return self.repository.get_most_portions().next()['name']
 
     def get_author_with_most_recipes(self):
-        return self.repository.get_author_with_most_recipes()
+        return self.repository.get_author_with_most_recipes().next()['_id']
 
     def clear(self):
         self.repository.clear()
