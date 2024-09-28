@@ -21,6 +21,7 @@ class BS4Scrapping:
         return soup
 
     def scrape_recipes(self):
+        recipes = []
         # Step 1: Load the main page to find the "/receptebi/" link
         main_page_url = f"{self.base_url}/"
         main_soup = self.get_soup(main_page_url)
@@ -55,8 +56,10 @@ class BS4Scrapping:
             a_tag = box_img.find('a', href=True)  # Find the <a> tag with an href attribute
             if a_tag:
                 href = a_tag['href']  # Extract the href attribute
-                self.scrap_one_recipe(href)
-                print(f"Found URL: {href}")
+                recipes.append(self.scrap_one_recipe(href))
+                # print(f"Found URL: {href}")
+
+        return recipes
 
     def scrap_one_recipe(self, one_recipe_url):
         one_recipe = self.get_soup(self.base_url + one_recipe_url)
@@ -109,23 +112,5 @@ class BS4Scrapping:
             subcategory = Category(subcategory_item.text, subcategory_item['href'])
 
         recipe = Recipe(name, ingredients, [instructions], category, subcategory, image, description, author, yield_amount)
-        print(recipe.to_dict())
-
-'''
-{'name': 'პომინდვრის წვნიანი',
-'ingredients': ['სურვილისამებრ სუხარი',
-'სურვილისამებრ პარმეზანი', 
-'გემოვნებით პილპილი', 
-'გემოვნებით მარილი', '1.000 ცალი გალინა ბლანკას კუბი',
-'600.000 მლ/ლ წყალი', '1.000 ჩ/კ დაფქული ქინძი', '1.000 ჩ/კ ორეგანო', 
-'1.000 ჩ/კ როზმარინი', '1.000 ს/კ ტომატ პასტა', '1.000 ს/კ ზეთი', 
-'70.000 გრამი მწვანე ხახვი', '1.000 კბილი ნიორი', '3.000 ცალი ბულგარული წითელი',
- '5.000 ცალი პომიდორი'], 'steps': ['\n1. გემრიელად მიირთვით.\n2.
-  თეფშზე სურვილისამებრ დაუმატეთ პარმეზანი და სუხარი.\n3. 
-  როცა წვნიანი ადუღდება დაუმატეთ როზმარინი,ორეგანო,დაფქული ქინძი,
-  მარილი,პილპილი გემოვნებით ადუღეთ კიდევ ცოტა ხანს და გადაიტამეთ 
-  მთლიანი მასა ბლენდერში კარგად დააბლენდერეთ მიღებული მასა დაასხით თეფშზე.\n4.
-   ცალკე ადუღე ულ წყალში გახსენით &quot;გალინა ბლანკას&quot;კუბი და ჩაასხით ქვაბში.\n5. 
-   ღრმა ქვაბში ჩაასხით ზეთი და ნიორი მოთუშეთ დაუმატეთ მწვანე ხახვი, პომიდორი,წითელი 
-   ბულგარული,ტომატ პასტა მოთუშეთ დაბალ ცეცხლზე.']}
-'''
+        # print(recipe.to_dict())
+        return recipe

@@ -35,8 +35,7 @@ class RecipeService:
     def __init__(self, repository: RecipeRepository):
         self.repository = repository
 
-    def create_recipe(self, name: str, ingredients: list[Ingredient], steps: list[Step]):
-        recipe = Recipe(name, ingredients, steps)
+    def create_recipe(self, recipe: Recipe):
         self.repository.add_recipe(recipe)
 
     def get_recipe_by_name(self, name: str) -> Recipe:

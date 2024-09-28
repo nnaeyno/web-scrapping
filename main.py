@@ -12,7 +12,19 @@ def create_mongo_client(db_name="recipe_db"):
 
 if __name__ == '__main__':
     scrapper = BS4Scrapping()
-    scrapper.scrape_recipes()
+    recipes = scrapper.scrape_recipes()
+
+    print(recipes)
+
+    db = create_mongo_client()
+    repository = RecipeRepository(db)
+    service = RecipeService(repository)
+
+    for recipe in recipes:
+        if recipe:
+            service.create_recipe(recipe)
+
+    service.list_all_recipes()
 
     # TEST MONGO
     # if __name__ == "__main__":
