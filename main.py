@@ -5,6 +5,8 @@ from scrapping import BS4Scrapping
 from pymongo import MongoClient
 
 CLEAR = False
+
+
 def create_mongo_client(db_name="recipe_db"):
     client = MongoClient("mongodb://localhost:27017/")
     return client[db_name]

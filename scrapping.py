@@ -43,11 +43,15 @@ class BS4Scrapping:
 
         category_url = self.base_url + category_link
         wvnianebi_soup = self.get_soup(category_url)
-        category = Category(wvnianebi_soup.find('h1', class_='title mainLeftSpace').text, category_url)
-        sub_categories = wvnianebi_soup.find('div', class_='recipe__nav--view').find('div', class_='recipe__nav-body')
+        category = Category(wvnianebi_soup.find(
+            'h1', class_='title mainLeftSpace').text, category_url)
+        sub_categories = wvnianebi_soup.find(
+            'div', class_='recipe__nav--view').find('div', class_='recipe__nav-body')
         sub_categories_names = sub_categories.find_all('div', class_='txt')
-        sub_categories_urls = hrefs = [a['href'] for a in sub_categories.find_all('a', href=True)]
-        recipes = self.scrap_sub_categories(sub_categories_urls, sub_categories_names, category)
+        sub_categories_urls = hrefs = [a['href']
+                                       for a in sub_categories.find_all('a', href=True)]
+        recipes = self.scrap_sub_categories(
+            sub_categories_urls, sub_categories_names, category)
 
         return recipes
 
@@ -68,9 +72,12 @@ class BS4Scrapping:
 
         name = one_recipe.find('div', class_='post__title').find('h1').text
         ingredients = get_ingredients(one_recipe)
-        image = self.base_url + one_recipe.find('div', class_='post__img').find('img')["src"]
-        description = one_recipe.find('div', class_='post__description').text.strip()
-        author = one_recipe.find('div', class_='post__author').find('a').text.strip()
+        image = self.base_url + \
+            one_recipe.find('div', class_='post__img').find('img')["src"]
+        description = one_recipe.find(
+            'div', class_='post__description').text.strip()
+        author = one_recipe.find(
+            'div', class_='post__author').find('a').text.strip()
         portion = self.get_portion(one_recipe)
         instructions = self.get_instructions(one_recipe)
         recipe = Recipe(name, ingredients,
@@ -78,13 +85,15 @@ class BS4Scrapping:
         return recipe
 
     def get_portion(self, one_recipe):
-        portion = one_recipe.findAll('div', class_='lineDesc__item')[1].text.strip()
+        portion = one_recipe.findAll('div', class_='lineDesc__item')[
+            1].text.strip()
         portion = portion.split()
         return int(portion[0]) if len(portion) > 1 else 1
 
     def get_instructions(self, one_recipe):
         instructions = one_recipe.findAll('div', class_='lineList__item')
-        instructions = list(map(lambda x: x.find('p').text.strip(), instructions))
+        instructions = list(
+            map(lambda x: x.find('p').text.strip(), instructions))
         result = []
         for step_number, step_desc in enumerate(instructions):
             step = Step(step_number, step_desc)
@@ -94,7 +103,8 @@ class BS4Scrapping:
     def scrap_sub_categories(self, sub_categories_urls, sub_categories_names, category_name):
         all_recipes = []
         for ind, sub_category_url in enumerate(sub_categories_urls):
-            sub_category = Category(sub_categories_names[ind].text, self.base_url + sub_category_url)
+            sub_category = Category(
+                sub_categories_names[ind].text, self.base_url + sub_category_url)
             all_recipes += (self.scrap_one_sub_category(sub_category, category_name))
         return all_recipes
 
@@ -111,6 +121,7 @@ class BS4Scrapping:
             a_tag = box_img.find('a', href=True)
             if a_tag:
                 href = a_tag['href']  # Extract the href attribute
-                recipes.append(self.scrap_one_recipe(href, category_name, sub_category))
+                recipes.append(self.scrap_one_recipe(
+                    href, category_name, sub_category))
 
         return recipes

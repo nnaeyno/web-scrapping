@@ -5,7 +5,7 @@ It extracts information such as the recipe name, ingredients, steps, category, s
 for later retrieval or use in other applications.
 
 ## Features
-* Scrapes recipe data from the kulinaria.ge website.
+* Scrapes recipe data from the `kulinaria.ge` website.
 * Extracts:
   * Recipe name
   * Ingredients

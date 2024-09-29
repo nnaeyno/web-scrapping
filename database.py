@@ -20,7 +20,8 @@ class RecipeRepository:
 
     def get_avg_ingredients(self):
         return self.collection.aggregate([
-            {'$group': {'_id': None, 'avgIngredients': {'$avg': {'$size': '$ingredients'}}}}
+            {'$group': {'_id': None, 'avgIngredients': {
+                '$avg': {'$size': '$ingredients'}}}}
         ])
 
     def get_avg_steps(self):
